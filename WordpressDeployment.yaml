@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  namespace: wordpress-web-app
+  labels:
+    app: wordpress
+    tier: frontend
+    storage: ephemeral
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+      storage: ephemeral
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+        storage: ephemeral
+    spec:
+      containers:
+      - name: wordpress
+        image: wordpress:latest
+        envFrom:
+        - configMapRef:
+            name: wordpress-config
+        - secretRef:
+            name: app-credentials
+        ports:
+        - containerPort: 80
+          name: wordpress
+        readinessProbe:
+          httpGet:
+            path: /wp-admin/install.php
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 5
+        livenessProbe:
+          httpGet:
+            path: /wp-admin/install.php
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 20

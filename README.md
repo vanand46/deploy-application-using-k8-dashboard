@@ -388,84 +388,110 @@ $ kubectl apply -f MysqlService.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: wordpress
   namespace: wordpress-web-app
   labels:
-    app: mysql
-    tier: database
+    app: wordpress
+    tier: frontend
+    storage: ephemeral
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
-      tier: database
+      app: wordpress
+      tier: frontend
+      storage: ephemeral
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
-        app: mysql
-        tier: database
+        app: wordpress
+        tier: frontend
+        storage: ephemeral
     spec:
-      securityContext:
-        fsGroup: 999
       containers:
-      - name: mysql
-        image: mysql:8.0
+      - name: wordpress
+        image: wordpress:latest
         envFrom:
+        - configMapRef:
+            name: wordpress-config
         - secretRef:
             name: app-credentials
         ports:
-        - containerPort: 3306
-          name: mysql
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
-        livenessProbe:
-          tcpSocket:
-            port: 3306
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        - containerPort: 80
+          name: wordpress
         readinessProbe:
-          exec:
-            command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
-          initialDelaySeconds: 5
+          httpGet:
+            path: /wp-admin/install.php
+            port: 80
+          initialDelaySeconds: 20
           periodSeconds: 10
-          timeoutSeconds: 1
-      volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-nfs-pvc
+          failureThreshold: 5
+        livenessProbe:
+          httpGet:
+            path: /wp-admin/install.php
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 20
 ```
-### Create the MySQL Service
-1. Create the `MysqlService.yaml` with the following content
+### Create the Wordpress Service
+1. Create the `WordpressService.yaml` with the following content
 ```YAML
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql-service
+  name: wordpress-service
   namespace: wordpress-web-app
   labels:
-    app: mysql
-    tier: database
+    app: wordpress
+    tier: frontend
+    storage: ephemeral
 spec:
   ports:
-  - port: 3306
-    targetPort: 3306
+  - port: 80
+    targetPort: 80
+    nodePort: 30081
   selector:
-    app: mysql
-    tier: database
-  type: ClusterIP
+    app: wordpress
+    tier: frontend
+    storage: ephemeral
+  type: LoadBalancer
 ```
 ### Apply the MySQL
 ```bash
-$ kubectl get pv mysql-nfs-pv
-$ kubectl get pvc mysql-nfs-pvc -n wordpress-web-app
-$ kubectl apply -f MysqlDeployment.yaml
-$ kubectl apply -f MysqlService.yaml
+$ kubectl apply -f WordpressDeployment.yaml
+$ kubectl apply -f WordpressService.yaml
 ```
-![MYSQL-1](./images/my-sql-1.png)
-![MYSQL-2](./images/my-sql-2.png)
-![MYSQL-3](./images/my-sql-3.png)
-![MYSQL-4](./images/my-sql-4.png)
-![MYSQL-5](./images/my-sql-5.png)
+kubectl get pods -n wordpress-web-app
+![WordPress-2](./images/wordpress-2.png)
+![WordPress-3](./images/wordpress-3.png)
+
+## To verify Pods and Deployments, run the following commands:
+Please run the following commands
+```bash
+$ kubectl get deployments -n wordpress-web-app
+$ kubectl get pods -n wordpress-web-app
+```
+![All-1](./images/all-1.png)
+![All-2](./images/all-2.png)
+
+
+## Exposing Service for WordPress and MySQL Deployment
+Please run the following commands
+```bash
+$ kubectl expose deployment -n wordpress-web-app mysql --port=3306 --type NodePort
+$ kubectl expose deployment -n wordpress-web-app wordpress --port=80 --type NodePort
+```
+![All-4](./images/all-4.png)
+
+## Verifying the Deployment of application
+1. Click on the **Master** tab in the lab environment, then select the **Desktop** option. *(This is specific to this lab setup.)*
+2. Open the **Firefox** browser.
+3. Alternatively, launch a browser from any machine within the intranet and access the Master Node's IP address.
+4. In Firefox, go to: `http://10.102.195.176:80`
+![All-5](./images/all-5.png)
+![All-6](./images/all-6.png)
