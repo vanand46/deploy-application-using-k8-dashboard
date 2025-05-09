@@ -94,3 +94,26 @@ $ kubectl -n kubernetes-dashboard create token admin-user
 Copy the token and paste it in Kubernetes Dashboard in Browser (In Step **Accessing the k8s Dashboard**).
 
 ![Accessing the k8s Dashboard After Login](./images/k8s-dashboard.png)
+
+## Create a New Namespace in the Application
+
+Follow the steps below to create a new namespace using the Kubernetes Dashboard:
+
+1. Open the **k8s Dashboard**.
+2. Click the **Add** button in the top-right corner to create a new resource.
+3. Choose the **Create from input** option.
+4. Copy and paste the following YAML content into the editor.
+5. Click **Upload** to apply the configuration.
+```YAML
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wordpress-web-app
+  labels:
+    project: wordpress-deployment
+    environment: dev
+```
+![Namespace](./images/create-nr.png)
+![Namespace](./images/create-ns-1.png)
+![Namespace](./images/create-ns-2.png)
+![Namespace](./images/create-ns-3.png)
