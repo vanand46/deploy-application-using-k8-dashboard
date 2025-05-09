@@ -292,4 +292,180 @@ $ kubectl apply -f CreatePersistentVolumeCalim.yaml
 ![PVC-1](./images/pvc-1.png)
 ![PVC-2](./images/pvc-2.png)
 
+## Create MySQL Deployment and Service
+### Create MySQL Deployment
+1. Create the `MysqlDeployment.yaml` with the following content
+```YAML
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: wordpress-web-app
+  labels:
+    app: mysql
+    tier: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+      tier: database
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+        tier: database
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        envFrom:
+        - secretRef:
+            name: app-credentials
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-nfs-pvc
+```
+### Create the MySQL Service
+1. Create the `MysqlService.yaml` with the following content
+```YAML
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: wordpress-web-app
+  labels:
+    app: mysql
+    tier: database
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+    tier: database
+  type: ClusterIP
+```
+### Apply the MySQL
+```bash
+$ kubectl get pv mysql-nfs-pv
+$ kubectl get pvc mysql-nfs-pvc -n wordpress-web-app
+$ kubectl apply -f MysqlDeployment.yaml
+$ kubectl apply -f MysqlService.yaml
+```
+![MYSQL-1](./images/my-sql-1.png)
+![MYSQL-2](./images/my-sql-2.png)
+![MYSQL-3](./images/my-sql-3.png)
+![MYSQL-4](./images/my-sql-4.png)
+![MYSQL-5](./images/my-sql-5.png)
 
+## Create Wordpress Deployment and Service
+### Create Wordpress Deployment
+1. Create the `WordpressDeployment.yaml` with the following content
+```YAML
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: wordpress-web-app
+  labels:
+    app: mysql
+    tier: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+      tier: database
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+        tier: database
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        envFrom:
+        - secretRef:
+            name: app-credentials
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-nfs-pvc
+```
+### Create the MySQL Service
+1. Create the `MysqlService.yaml` with the following content
+```YAML
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: wordpress-web-app
+  labels:
+    app: mysql
+    tier: database
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+    tier: database
+  type: ClusterIP
+```
+### Apply the MySQL
+```bash
+$ kubectl get pv mysql-nfs-pv
+$ kubectl get pvc mysql-nfs-pvc -n wordpress-web-app
+$ kubectl apply -f MysqlDeployment.yaml
+$ kubectl apply -f MysqlService.yaml
+```
+![MYSQL-1](./images/my-sql-1.png)
+![MYSQL-2](./images/my-sql-2.png)
+![MYSQL-3](./images/my-sql-3.png)
+![MYSQL-4](./images/my-sql-4.png)
+![MYSQL-5](./images/my-sql-5.png)
