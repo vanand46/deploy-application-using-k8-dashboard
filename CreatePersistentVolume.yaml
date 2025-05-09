@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-nfs-pv
+  labels:
+    type: nfs-storage
+    app: mysql
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual-nfs
+  nfs:
+    path: /dbdata
+    server: 172.31.0.228
+    readOnly: false

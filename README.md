@@ -233,6 +233,63 @@ $ sudo systemctl status nfs-common
 ```
 ![NFS Kernel Server-1](./images/nfs-ks-9.png)
 
+### Create the PersistentVolume
+1. Create the `CreatePersistentVolume.yaml` with the following content
+```bash
+$ vi CreatePersistentVolume.yaml
+```
+```YAML
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-nfs-pv
+  labels:
+    type: nfs-storage
+    app: mysql
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual-nfs
+  nfs:
+    path: /dbdata
+    server: 172.31.0.228
+    readOnly: false
+```
+2. Create the PersistentVolume
+```bash
+$ kubectl apply -f CreatePersistentVolume.yaml
+```
+![PV-1](./images/pv-1.png)
+![PV-2](./images/pv-2.png)
 
+### Create the PersistentVolumeClaim
+1. Create the `CreatePersistentVolumeClaim.yaml` with the following content
+```bash
+$ vi CreatePersistentVolumeClaim.yaml
+```
+```YAML
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-nfs-pvc
+  namespace: wordpress-web-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: manual-nfs
+```
+2. Create the PersistentVolumeClaim
+```bash
+$ kubectl apply -f CreatePersistentVolumeCalim.yaml
+```
+![PVC-1](./images/pvc-1.png)
+![PVC-2](./images/pvc-2.png)
 
 
