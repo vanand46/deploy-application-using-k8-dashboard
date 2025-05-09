@@ -117,3 +117,25 @@ metadata:
 ![Namespace](./images/create-ns-1.png)
 ![Namespace](./images/create-ns-2.png)
 ![Namespace](./images/create-ns-3.png)
+
+## Create the ConfigMap
+1. Select the namespace **wordpress-web-app** in k8s Dashboard**.
+2. Click the **Add** button in the top-right corner to create a new resource.
+3. Choose the **Create from input** option.
+4. Copy and paste the following YAML content into the editor.
+5. Click **Upload** to apply the configuration.
+
+```YAML
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress-config
+  namespace: wordpress-web-app
+data:
+  WORDPRESS_DB_HOST: "mysql-service"
+  WORDPRESS_DB_NAME: "wordpress_db"
+```
+
+![Namespace](./images/create-ns-3.png)
+![Namespace](./images/create-configmap.png)
+
