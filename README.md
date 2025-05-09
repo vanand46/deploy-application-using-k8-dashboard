@@ -171,3 +171,68 @@ data:
 ```
 ![ConfigMap](./images/create-ns-3.png)
 ![ConfigMap](./images/create-secret.png)
+
+## Configuring Pod Using NFS based PersistentVolume (PV) and PersistentVolumeClaim (PVC)
+
+### Configure the NFS Kernel Server
+
+1. Go to the worker-node-1
+2. Create the directory
+![NFS Kernel Server-1](./images/nfs-ks-1.png)
+3. Install the NFS kernel server on the machine:
+![NFS Kernel Server-1](./images/nfs-ks-2.png)
+4. To grant permission to access the host server machine, open the exports file in the /etc directory
+```bash
+$ sudo nano /etc/exports
+```
+5. Inside the file, append the following code:
+`/dbdata 	*(rw,sync,no_root_squash)`
+![NFS Kernel Server-1](./images/nfs-ks-3.png)
+6. To export all shared directories, you have defined in the /etc/exports file, use:
+```bash
+sudo exportfs -rv
+```
+![NFS Kernel Server-1](./images/nfs-ks-4.png)
+7. Make the folder publicly accessible by changing its owner user and group:
+```bash
+$ sudo chown nobody:nogroup /dbdata/
+```
+8. Assign full permissions to ensure everyone can read, write, and execute files in this directory:
+```bash
+$ sudo chmod 777 /dbdata/
+```
+![NFS Kernel Server-1](./images/nfs-ks-5.png)
+9. Restart the NFS kernel server to apply the changes:
+```bash
+$ sudo systemctl restart nfs-kernel-server
+```
+![NFS Kernel Server-1](./images/nfs-ks-6.png)
+
+10. Retrieve the internal IP of the node where NFS Server is installed, which will be used to link the PV
+```bash
+$ ip a
+```
+After running this command, look for the relevant IP address in the output. This IP will be used to associate the PV with the NFS server. We will be using IP in step 4.
+![NFS Kernel Server-1](./images/nfs-ks-7.png)
+
+11. Configure the NFS common on client machines
+> **Note**  Perform these steps on each **worker node** intended for sharing.
+
+Run the following command to install the NFS common package:
+```bash
+$ sudo apt install nfs-common
+```
+![NFS Kernel Server-1](./images/nfs-ks-8.png)
+
+12. Execute the following commands to refresh the NFS common service and verify its current status:
+```bash
+$ sudo rm /lib/systemd/system/nfs-common.service
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart nfs-common
+$ sudo systemctl status nfs-common
+```
+![NFS Kernel Server-1](./images/nfs-ks-9.png)
+
+
+
+
