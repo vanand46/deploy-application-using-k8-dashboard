@@ -119,7 +119,7 @@ metadata:
 ![Namespace](./images/create-ns-3.png)
 
 ## Create the ConfigMap
-1. Select the namespace **wordpress-web-app** in k8s Dashboard**.
+1. Select the namespace **wordpress-web-app** in **k8s Dashboard**.
 2. Click the **Add** button in the top-right corner to create a new resource.
 3. Choose the **Create from input** option.
 4. Copy and paste the following YAML content into the editor.
@@ -136,6 +136,38 @@ data:
   WORDPRESS_DB_NAME: "wordpress_db"
 ```
 
-![Namespace](./images/create-ns-3.png)
-![Namespace](./images/create-configmap.png)
+![ConfigMap](./images/create-ns-3.png)
+![ConfigMap](./images/create-configmap.png)
 
+## Create the Secret
+1. Select the namespace **wordpress-web-app** in **k8s Dashboard**.
+2. Click the **Add** button in the top-right corner to create a new resource.
+3. Choose the **Create from input** option.
+4. Copy and paste the following YAML content into the editor.
+5. Click **Upload** to apply the configuration.
+
+```YAML
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-credentials
+  namespace: wordpress-web-app
+type: Opaque
+data:
+  MYSQL_ROOT_PASSWORD: "d2ViYXBwQDEyMw=="
+  MYSQL_DATABASE: "d29yZHByZXNzX2Ri"
+  MYSQL_USER: "d3BfdXNlcg=="                                     
+  MYSQL_PASSWORD: "d2ViYXBwQDEyMw=="
+  WORDPRESS_DB_USER: "d3BfdXNlcg=="
+  WORDPRESS_DB_PASSWORD: "d2ViYXBwQDEyMw=="
+  WORDPRESS_AUTH_KEY: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_SECURE_AUTH_KEY: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_LOGGED_IN_KEY: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_NONCE_KEY: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_AUTH_SALT: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_SECURE_AUTH_SALT: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_LOGGED_IN_SALT: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+  WORDPRESS_NONCE_SALT: "d2ViYXBwd29yZHByZXNzQDEyMw=="
+```
+![ConfigMap](./images/create-ns-3.png)
+![ConfigMap](./images/create-secret.png)
